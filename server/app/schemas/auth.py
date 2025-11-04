@@ -1,10 +1,13 @@
 from pydantic import BaseModel, EmailStr
 
-class LoginIn(BaseModel):
+class LoginInput(BaseModel):
     email: EmailStr
     password: str
 
 class TokenOut(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
-    user: dict
+    token: str
+
+class UserOut(BaseModel):
+    id: int
+    name: str
+    email: EmailStr
