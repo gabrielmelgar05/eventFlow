@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "EventFlow",
+    "slug": "eventflow",
+    "scheme": "eventflow",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "assetBundlePatterns": ["**/*"],
+    "plugins": [
+      ["expo-location", { "isAndroidBackgroundLocationEnabled": false }]
+    ],
+    "android": {
+      "package": "com.batman.eventflow",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
+    }
+  }
+}
