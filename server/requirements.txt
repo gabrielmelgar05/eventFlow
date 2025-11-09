@@ -4,5 +4,11 @@ python-multipart==0.0.9
 pydantic==2.8.2
 SQLAlchemy==2.0.36
 alembic==1.13.2
-pg8000==1.31.2
 python-dotenv==1.0.1
+
+# Auth
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# Postgres (100% Python, sem pg_config)
+pg8000==1.31.2
