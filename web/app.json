@@ -5,18 +5,45 @@
     "scheme": "eventflow",
     "version": "1.0.0",
     "orientation": "portrait",
-    "assetBundlePatterns": ["**/*"],
     "plugins": [
-      ["expo-location", { "isAndroidBackgroundLocationEnabled": false }]
-    ],
-    "android": {
-      "package": "com.batman.eventflow",
-      "permissions": [
-        "ACCESS_FINE_LOCATION",
-        "CAMERA",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Permitir que o EventFlow acesse sua localização."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Permitir que o EventFlow acesse suas fotos."
+        }
       ]
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.seuusuario.eventflow",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Usamos sua localização para mostrar eventos próximos"
+      }
+    },
+    "android": {
+      "package": "com.seuusuario.eventflow",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "CAMERA"
+      ],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "CHANGE-ME"
+      }
     }
   }
 }
