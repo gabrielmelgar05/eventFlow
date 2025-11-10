@@ -1,20 +1,34 @@
-import os
-from dotenv import load_dotenv
-from pydantic import BaseModel
-load_dotenv()
+# app/core/config.py
+from typing import List, Any
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import field_validator
 
-class Settings(BaseModel):
-    APP_NAME: str = os.getenv("APP_NAME", "EventFlow API")
-    APP_HOST: str = os.getenv("APP_HOST", "0.0.0.0")
-    APP_PORT: int = int(os.getenv("APP_PORT", 8000))
-    CORS_ORIGINS: list[str] = os.getenv("CORS_ORIGINS", "*").split(",")
 
-    JWT_SECRET: str = os.getenv("JWT_SECRET", "secret")
-    JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")
-    JWT_EXPIRES_MINUTES: int = int(os.getenv("JWT_EXPIRES_MINUTES", "2880"))
+class Settings(BaseSettings):
+    # Banco
+    DATABASE_URL: str = "sqlite:///./dev.db"
 
-    DATABASE_URL: str = os.getenv("DATABASE_URL")
-    MEDIA_DIR: str = os.getenv("MEDIA_DIR", "uploads")
-    BASE_URL: str = os.getenv("BASE_URL", "http://localhost:8000")
+    # JWT
+    JWT_SECRET: str = "change-me-in-.env"
+    JWT_ALGORITHM: str = "HS256"
+    JWT_EXPIRES_MINUTES: int = 60
+
+    # CORS
+    # Aceita "*" ou lista separada por vírgula no .env (ex: http://localhost:3000,http://localhost:5173)
+    CORS_ORIGINS: List[str] = ["*"]
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=True,
+        extra="ignore",   # ignora APP_NAME, BASE_URL etc. se existirem no .env
+    )
+
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
+    def split_cors(cls, v: Any) -> List[str]:
+        if isinstance(v, str):
+            return [s.strip() for s in v.split(",")] if v and v != "*" else ["*"]
+        return v
+
 
 settings = Settings()

@@ -4,6 +4,9 @@ class LoginInput(BaseModel):
     email: EmailStr
     password: str
 
+class SignupInput(LoginInput):
+    name: str
+
 class TokenOut(BaseModel):
     token: str
 

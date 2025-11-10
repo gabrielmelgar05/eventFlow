@@ -2,15 +2,46 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from jose import jwt, JWTError
 from fastapi.security import OAuth2PasswordBearer
+from pydantic import BaseModel, EmailStr
+
 from app.core.db import get_db
-from app.core.security import verify_password, create_access_token
+from app.core.security import verify_password, get_password_hash, create_access_token
 from app.core.config import settings
 from app.models.user import User
-from app.schemas.auth import LoginInput, TokenOut, UserOut
+from app.schemas.auth import LoginInput, TokenOut, UserOut  # você já tem esses schemas
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
+
+# --- SIGNUP ---
+class SignupInput(BaseModel):
+    name: str
+    email: EmailStr
+    password: str
+
+
+@router.post("/signup", response_model=TokenOut, status_code=201)
+def signup(payload: SignupInput, db: Session = Depends(get_db)):
+    # e-mail único
+    if db.query(User).filter(User.email == payload.email).first():
+        raise HTTPException(status_code=409, detail="E-mail já cadastrado")
+
+    # hash seguro (bcrypt_sha256 aceita senhas >72 bytes)
+    user = User(
+        name=payload.name,
+        email=payload.email,
+        password_hash=get_password_hash(payload.password),
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    token = create_access_token(str(user.id))
+    return {"token": token}
+
+
+# --- LOGIN ---
 @router.post("/login", response_model=TokenOut)
 def login(payload: LoginInput, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == payload.email).first()
@@ -19,16 +50,23 @@ def login(payload: LoginInput, db: Session = Depends(get_db)):
     token = create_access_token(str(user.id))
     return {"token": token}
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
+
+# --- CURRENT USER ---
+def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db),
+) -> User:
     try:
         payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM])
         user_id = int(payload.get("sub"))
     except JWTError:
         raise HTTPException(status_code=401, detail="Token inválido")
-    user = db.query(User).get(user_id)
+
+    user = db.get(User, user_id)  # estilo SQLAlchemy 2.0
     if not user:
         raise HTTPException(status_code=401, detail="Usuário não encontrado")
     return user
+
 
 @router.get("/me", response_model=UserOut)
 def me(user: User = Depends(get_current_user)):

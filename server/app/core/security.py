@@ -1,17 +1,22 @@
+# app/core/security.py
 from datetime import datetime, timedelta
 from jose import jwt
 from passlib.context import CryptContext
-from .config import settings
+from app.core.config import settings
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# aceita senhas longas com segurança
+pwd_context = CryptContext(schemes=["bcrypt_sha256"], deprecated="auto")
 
-def hash_password(pw: str) -> str:
-    return pwd_context.hash(pw)
+def get_password_hash(password: str) -> str:
+    return pwd_context.hash(password)
 
-def verify_password(pw: str, hashed: str) -> bool:
-    return pwd_context.verify(pw, hashed)
+def verify_password(plain: str, hashed: str) -> bool:
+    return pwd_context.verify(plain, hashed)
 
-def create_access_token(sub: str) -> str:
-    expire = datetime.utcnow() + timedelta(minutes=settings.JWT_EXPIRES_MINUTES)
-    payload = {"sub": sub, "exp": expire}
+def create_access_token(sub: str, expires_minutes: int = 60) -> str:
+    payload = {
+        "sub": sub,
+        "exp": datetime.utcnow() + timedelta(minutes=expires_minutes),
+        "iat": datetime.utcnow(),
+    }
     return jwt.encode(payload, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
