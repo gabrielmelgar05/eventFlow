@@ -1,9 +1,15 @@
-import { Text, View } from "react-native"
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { NavigationContainer } from '@react-navigation/native';
+import RootNavigator from './src/navigation/RootNavigator';
+
+const queryClient = new QueryClient();
 
 export default function App() {
   return (
-    <View className="flex-1 items-center justify-center bg-black">
-      <Text className="text-white text-xl">EventFlow 🗺️</Text>
-    </View>
-  )
+    <QueryClientProvider client={queryClient}>
+      <NavigationContainer>
+        <RootNavigator />
+      </NavigationContainer>
+    </QueryClientProvider>
+  );
 }

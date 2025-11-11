@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # server/alembic/env.py
 
 # alembic/env.py
@@ -27,15 +28,38 @@ from app.models import user, category, location, event  # ajuste a lista conform
 config = context.config
 
 # Sobrescreve a URL do ini pela env var, se existir
+=======
+import os
+from logging.config import fileConfig
+from sqlalchemy import engine_from_config, pool
+from alembic import context
+
+# >>> carregue o .env
+from dotenv import load_dotenv
+load_dotenv()
+
+config = context.config
+
+# injeta DATABASE_URL vindo do .env
+>>>>>>> 429f07bb4c0d7b126849e3c5ca17e029bf883e5a
 db_url = os.getenv("DATABASE_URL")
 if db_url:
     config.set_main_option("sqlalchemy.url", db_url)
 
+<<<<<<< HEAD
 # Logging do alembic.ini
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # Este é o metadata que o Alembic inspeciona
+=======
+# logger do alembic
+if config.config_file_name is not None:
+    fileConfig(config.config_file_name)
+
+# importe seu Base.metadata
+from app.core.db import Base  # ajuste o caminho se diferente
+>>>>>>> 429f07bb4c0d7b126849e3c5ca17e029bf883e5a
 target_metadata = Base.metadata
 
 def run_migrations_offline():
@@ -51,10 +75,16 @@ def run_migrations_offline():
 
 def run_migrations_online():
     connectable = engine_from_config(
+<<<<<<< HEAD
         config.get_section(config.config_ini_section),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
         future=True,
+=======
+        config.get_section(config.config_ini_section, {}),
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
+>>>>>>> 429f07bb4c0d7b126849e3c5ca17e029bf883e5a
     )
     with connectable.connect() as connection:
         context.configure(
