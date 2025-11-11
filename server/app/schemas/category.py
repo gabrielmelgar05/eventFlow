@@ -1,7 +1,10 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-class CategoryIn(BaseModel):
-    name: str
+class CategoryCreate(BaseModel):
+    name: str = Field(min_length=2, max_length=120)
+
+class CategoryUpdate(BaseModel):
+    name: str = Field(min_length=2, max_length=120)
 
 class CategoryOut(BaseModel):
     id: int

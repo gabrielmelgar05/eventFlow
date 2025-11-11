@@ -1,7 +1,6 @@
-# Importa os models para o Alembic enxergar o metadata
-from .user import User
-from .category import Category
-from .location import Location
-from .event import Event
+from app.models.user import User
+from app.models.category import Category
+from app.models.location import Location
+from app.models.event import Event
 
 __all__ = ["User", "Category", "Location", "Event"]

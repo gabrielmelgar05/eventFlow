@@ -1,31 +1,40 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.core.db import get_db
+from app.schemas.category import CategoryCreate, CategoryUpdate, CategoryOut
 from app.models.category import Category
-from app.schemas.category import CategoryIn, CategoryOut
-from .auth import get_current_user
+from typing import List
 
 router = APIRouter(prefix="/categories", tags=["categories"])
 
-@router.get("", response_model=list[CategoryOut])
+@router.get("", response_model=List[CategoryOut])
 def list_categories(db: Session = Depends(get_db)):
     return db.query(Category).order_by(Category.name).all()
 
-@router.post("", response_model=CategoryOut)
-def create_category(payload: CategoryIn, db: Session = Depends(get_db), _=Depends(get_current_user)):
-    c = Category(name=payload.name)
-    db.add(c); db.commit(); db.refresh(c)
-    return c
+@router.post("", response_model=CategoryOut, status_code=201)
+def create_category(payload: CategoryCreate, db: Session = Depends(get_db)):
+    if db.query(Category).filter(Category.name == payload.name).first():
+        raise HTTPException(status_code=409, detail="Categoria já existe")
+    obj = Category(name=payload.name)
+    db.add(obj)
+    db.commit()
+    db.refresh(obj)
+    return obj
 
-@router.put("/{cat_id}", response_model=CategoryOut)
-def update_category(cat_id: int, payload: CategoryIn, db: Session = Depends(get_db), _=Depends(get_current_user)):
-    c = db.query(Category).get(cat_id)
-    c.name = payload.name
-    db.commit(); db.refresh(c)
-    return c
+@router.put("/{category_id}", response_model=CategoryOut)
+def update_category(category_id: int, payload: CategoryUpdate, db: Session = Depends(get_db)):
+    obj = db.get(Category, category_id)
+    if not obj:
+        raise HTTPException(status_code=404, detail="Categoria não encontrada")
+    obj.name = payload.name
+    db.commit()
+    db.refresh(obj)
+    return obj
 
-@router.delete("/{cat_id}")
-def delete_category(cat_id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
-    c = db.query(Category).get(cat_id)
-    db.delete(c); db.commit()
-    return {"ok": True}
+@router.delete("/{category_id}", status_code=204)
+def delete_category(category_id: int, db: Session = Depends(get_db)):
+    obj = db.get(Category, category_id)
+    if not obj:
+        raise HTTPException(status_code=404, detail="Categoria não encontrada")
+    db.delete(obj)
+    db.commit()

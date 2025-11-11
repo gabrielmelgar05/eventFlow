@@ -1,11 +1,11 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 class LoginInput(BaseModel):
     email: EmailStr
-    password: str
+    password: str = Field(min_length=4)
 
 class SignupInput(LoginInput):
-    name: str
+    name: str = Field(min_length=2, max_length=120)
 
 class TokenOut(BaseModel):
     token: str
