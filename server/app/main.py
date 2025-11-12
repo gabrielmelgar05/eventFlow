@@ -1,9 +1,4 @@
-<<<<<<< HEAD
 import os
-=======
-# main.py
-
->>>>>>> 429f07bb4c0d7b126849e3c5ca17e029bf883e5a
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 

@@ -1,4 +1,4 @@
-#!/home/victor-melgar/Documentos/GitHub/eventFlow/server/.venv/bin/python
+#!/home/victor-melgar/Documentos/GitHub/eventFlow/server/.venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys

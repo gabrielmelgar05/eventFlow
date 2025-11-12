@@ -2,7 +2,6 @@ fastapi==0.115.0
 uvicorn[standard]==0.30.5
 
 SQLAlchemy==2.0.36
-<<<<<<< HEAD
 
 pydantic==2.8.2
 pydantic-settings==2.11.0
@@ -14,14 +13,3 @@ bcrypt==4.0.1
 python-jose[cryptography]==3.3.0
 email-validator==2.3.0
 python-multipart==0.0.9
-=======
-alembic==1.13.2
-python-dotenv==1.0.1
-
-# Auth
-python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
-
-# Postgres (100% Python, sem pg_config)
-pg8000==1.31.2
->>>>>>> 429f07bb4c0d7b126849e3c5ca17e029bf883e5a
