@@ -1,8 +1,9 @@
+// src/context/AuthContext.js
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as AuthApi from '../api/auth';
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -14,23 +15,44 @@ export function AuthProvider({ children }) {
       try {
         const storedToken = await AsyncStorage.getItem('@eventflow:token');
         const storedUser = await AsyncStorage.getItem('@eventflow:user');
+
         if (storedToken) setToken(storedToken);
         if (storedUser) setUser(JSON.parse(storedUser));
       } finally {
         setLoading(false);
       }
     }
+
     loadStorage();
   }, []);
 
   async function signIn({ email, password }) {
-    const data = await AuthApi.login(email, password);
-    const accessToken = data.access_token || data.token;
-    const userData = data.user || { email };
-    setToken(accessToken);
-    setUser(userData);
-    await AsyncStorage.setItem('@eventflow:token', accessToken);
-    await AsyncStorage.setItem('@eventflow:user', JSON.stringify(userData));
+    try {
+      console.log('AuthContext: chamando AuthApi.login...');
+      const data = await AuthApi.login(email, password);
+      console.log('AuthContext: resposta da API:', data);
+
+      const accessToken = data.access_token || data.token;
+      const userData = data.user || { email };
+
+      if (!accessToken) {
+        throw new Error('Token não retornado pela API');
+      }
+
+      setToken(accessToken);
+      setUser(userData);
+
+      await AsyncStorage.setItem('@eventflow:token', accessToken);
+      await AsyncStorage.setItem('@eventflow:user', JSON.stringify(userData));
+
+      return true; // ✅ indica que deu bom
+    } catch (error) {
+      console.log(
+        'AuthContext: erro no signIn:',
+        error?.response?.data || error.message
+      );
+      throw error; // deixa a tela tratar
+    }
   }
 
   async function signOut() {
@@ -56,5 +78,9 @@ export function AuthProvider({ children }) {
 }
 
 export function useAuth() {
-  return useContext(AuthContext);
+  const ctx = useContext(AuthContext);
+  if (!ctx) {
+    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
+  }
+  return ctx;
 }

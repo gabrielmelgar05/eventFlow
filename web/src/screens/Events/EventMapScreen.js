@@ -3,8 +3,9 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'rea
 import MapView, { Marker } from 'react-native-maps'
 import * as Location from 'expo-location'
 import { useNavigation } from '@react-navigation/native'
+import api from '../../api/client'
 
-export default function LocationMapScreen() {
+export default function EventMapScreen() {
   const navigation = useNavigation()
   const [region, setRegion] = useState(null)
   const [marker, setMarker] = useState(null)
@@ -48,17 +49,25 @@ export default function LocationMapScreen() {
     setMarker({ latitude, longitude })
   }
 
-  function handleConfirm() {
+  async function handleConfirm() {
     if (!marker) {
       alert('Marque um ponto no mapa.')
       return
     }
-    navigation.navigate('LocationFormScreen', {
-      locationFromMap: {
+    try {
+      const payload = {
+        name: 'Local do Evento',
         latitude: marker.latitude,
         longitude: marker.longitude,
-      },
-    })
+        address: null,
+      }
+      const response = await api.post('/locations', payload)
+      const location = response.data
+      navigation.navigate('EventFormScreen', { locationFromMap: location })
+    } catch (error) {
+      console.log(error)
+      alert('Erro ao salvar local.')
+    }
   }
 
   if (loading || !region) {
@@ -75,7 +84,7 @@ export default function LocationMapScreen() {
         {marker && <Marker coordinate={marker} />}
       </MapView>
       <View style={styles.bottomPanel}>
-        <Text style={styles.infoText}>Toque no mapa para marcar o local.</Text>
+        <Text style={styles.infoText}>Toque no mapa para marcar o local do evento.</Text>
         <View style={styles.buttonsRow}>
           <TouchableOpacity
             style={[styles.button, styles.cancelButton]}

@@ -1,3 +1,4 @@
+// src/screens/Auth/LoginScreen.js
 import React, { useState } from 'react';
 import {
   View,
@@ -6,20 +7,34 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
-  StyleSheet,
+  StyleSheet,          // ⬅️ IMPORTANTE
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
 
 export default function LoginScreen() {
   const { signIn } = useAuth();
+  const navigation = useNavigation();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   async function handleLogin() {
+    if (!email || !password) {
+      Alert.alert('Atenção', 'Preencha email e senha.');
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      setLoading(true);
       await signIn({ email, password });
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'MainTabs' }],
+      });
     } catch (error) {
       Alert.alert('Erro', 'Não foi possível entrar. Verifique seus dados.');
     } finally {
