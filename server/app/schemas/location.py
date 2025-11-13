@@ -1,3 +1,5 @@
+# schemas/location.py
+
 from pydantic import BaseModel, Field
 
 class LocationCreate(BaseModel):

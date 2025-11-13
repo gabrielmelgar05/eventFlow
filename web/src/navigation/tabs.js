@@ -1,12 +1,13 @@
-import React from "react";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import EventsListScreen from "../screens/Events/EventListScreen";
-import EventMapScreen from "../screens/Events/EventMapScreen";
-import CategoriesScreen from "../screens/Catalogs/CategoriesScreen";
-import LocationsScreen from "../screens/Catalogs/LocationsScreen";
-import ProfileScreen from "../screens/Profile/ProfileScreen";
-import { MaterialIcons, Ionicons, FontAwesome5 } from "@expo/vector-icons";
-import { View } from "react-native";
+// src/navigation/tabs.js
+import React from 'react';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons } from '@expo/vector-icons';
+
+import EventListScreen from '../screens/Catalogs/EventListScreen';
+import EventMapScreen from '../screens/Catalogs/EventMapScreen';
+import CategoriesScreen from '../screens/Catalogs/CategoriesScreen';
+import LocationFormScreen from '../screens/Catalogs/LocationFormScreen';
+import ProfileScreen from '../screens/Profile/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -15,27 +16,29 @@ export default function Tabs() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: "#0077ff",
-        tabBarStyle: { height: 64, paddingBottom: 8, paddingTop: 6 },
-        tabBarIcon: ({ color, size, focused }) => {
-          if (route.name === "Eventos")
-            return <MaterialIcons name="event" size={22} color={color} />;
-          if (route.name === "Mapa")
-            return <Ionicons name="map" size={22} color={color} />;
-          if (route.name === "Categorias")
-            return <FontAwesome5 name="tags" size={18} color={color} />;
-          if (route.name === "Locais")
-            return <Ionicons name="location" size={20} color={color} />;
-          if (route.name === "Perfil")
-            return <MaterialIcons name="person" size={22} color={color} />;
-          return <View />;
+        tabBarActiveTintColor: '#2f54eb',
+        tabBarInactiveTintColor: '#999',
+        tabBarStyle: {
+          height: 60,
+          paddingBottom: 8,
+        },
+        tabBarIcon: ({ color, size }) => {
+          let iconName = 'ellipse';
+
+          if (route.name === 'Eventos') iconName = 'list';
+          if (route.name === 'Mapa') iconName = 'map';
+          if (route.name === 'Categorias') iconName = 'pricetags';
+          if (route.name === 'Locais') iconName = 'location';
+          if (route.name === 'Perfil') iconName = 'person';
+
+          return <Ionicons name={iconName} size={size} color={color} />;
         },
       })}
     >
-      <Tab.Screen name="Eventos" component={EventsListScreen} />
+      <Tab.Screen name="Eventos" component={EventListScreen} />
       <Tab.Screen name="Mapa" component={EventMapScreen} />
       <Tab.Screen name="Categorias" component={CategoriesScreen} />
-      <Tab.Screen name="Locais" component={LocationsScreen} />
+      <Tab.Screen name="Locais" component={LocationFormScreen} />
       <Tab.Screen name="Perfil" component={ProfileScreen} />
     </Tab.Navigator>
   );

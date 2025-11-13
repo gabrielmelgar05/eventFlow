@@ -1,15 +1,55 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as AuthApi from '../api/auth';
 
-const AuthContext = createContext(null);
+const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = (userData) => setUser(userData);
-  const logout = () => setUser(null);
+  useEffect(() => {
+    async function loadStorage() {
+      try {
+        const storedToken = await AsyncStorage.getItem('@eventflow:token');
+        const storedUser = await AsyncStorage.getItem('@eventflow:user');
+        if (storedToken) setToken(storedToken);
+        if (storedUser) setUser(JSON.parse(storedUser));
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadStorage();
+  }, []);
+
+  async function signIn({ email, password }) {
+    const data = await AuthApi.login(email, password);
+    const accessToken = data.access_token || data.token;
+    const userData = data.user || { email };
+    setToken(accessToken);
+    setUser(userData);
+    await AsyncStorage.setItem('@eventflow:token', accessToken);
+    await AsyncStorage.setItem('@eventflow:user', JSON.stringify(userData));
+  }
+
+  async function signOut() {
+    setToken(null);
+    setUser(null);
+    await AsyncStorage.multiRemove(['@eventflow:token', '@eventflow:user']);
+  }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        signed: !!token,
+        loading,
+        signIn,
+        signOut,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

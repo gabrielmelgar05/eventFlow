@@ -27,3 +27,6 @@ class EventOut(BaseModel):
     category_id: int
     location_id: int
     owner_id: int
+
+    class Config:
+        from_attributes = True

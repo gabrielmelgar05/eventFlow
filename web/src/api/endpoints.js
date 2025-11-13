@@ -1,16 +1,15 @@
-export const endpoints = {
-  signup: '/auth/signup',
-  login: '/auth/login',
-  me: '/auth/me',
+// src/api/endpoints.js
+export const ENDPOINTS = {
+  LOGIN: '/auth/login',
+  SIGNUP: '/auth/signup',
+  ME: '/auth/me',
 
-  categories: '/categories',
-  category: (id) => `/categories/${id}`,
+  EVENTS: '/events',
+  EVENT_DETAIL: id => `/events/${id}`,
 
-  locations: '/locations',
-  location: (id) => `/locations/${id}`,
+  CATEGORIES: '/categories',
+  CATEGORY_DETAIL: id => `/categories/${id}`,
 
-  events: '/events',
-  event: (id) => `/events/${id}`,
-  eventImage: (id) => `/events/${id}/image`,           // se você criou esse endpoint PUT/POST
-  eventCreateWithImage: '/event/create-with-image'     // ou esse direto
+  LOCATIONS: '/locations',
+  LOCATION_DETAIL: id => `/locations/${id}`,
 };

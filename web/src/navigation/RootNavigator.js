@@ -1,38 +1,50 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createStackNavigator } from '@react-navigation/stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useAuth } from '../context/AuthContext';
-import Tabs from './tabs';
 import LoginScreen from '../screens/Auth/LoginScreen';
-import SignupScreen from '../screens/Auth/SignupScreen';
-import EventDetailScreen from '../screens/Events/EventDetailScreen';
-import EventFormScreen from '../screens/Events/EventFormScreen';
+import EventListScreen from '../screens/Catalogs/EventListScreen';
+import EventDetailScreen from '../screens/Catalogs/EventDetailScreen';
+import EventFormScreen from '../screens/Catalogs/EventFormScreen';
+import LocationsScreen from '../screens/Catalogs/LocationsScreen';
 import LocationFormScreen from '../screens/Catalogs/LocationFormScreen';
+import ProfileScreen from '../screens/Profile/ProfileScreen';
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
+const Tab = createBottomTabNavigator();
+
+function AppTabs() {
+  return (
+    <Tab.Navigator screenOptions={{ headerShown: false }}>
+      <Tab.Screen name="Eventos" component={EventListScreen} />
+      <Tab.Screen name="Locais" component={LocationsScreen} />
+    </Tab.Navigator>
+  );
+}
 
 export default function RootNavigator() {
-  const { user, booting } = useAuth();
+  const { signed, loading } = useAuth();
 
-  if (booting) return null;
+  if (loading) {
+    return null;
+  }
 
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        {user ? (
-          <>
-            <Stack.Screen name="Home" component={Tabs} options={{ headerShown: false }} />
-            <Stack.Screen name="EventoDetalhe" component={EventDetailScreen} options={{ title: 'Evento' }} />
-            <Stack.Screen name="EventoForm" component={EventFormScreen} options={{ title: 'Criar/Editar Evento' }} />
-            <Stack.Screen name="LocationForm" component={LocationFormScreen} options={{ title: 'Local' }} />
-          </>
-        ) : (
-          <>
-            <Stack.Screen name="Login" component={LoginScreen} options={{ title: 'Entrar' }} />
-            <Stack.Screen name="Signup" component={SignupScreen} options={{ title: 'Cadastrar' }} />
-          </>
-        )}
-      </Stack.Navigator>
+      {signed ? (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Main" component={AppTabs} />
+          <Stack.Screen name="EventDetail" component={EventDetailScreen} />
+          <Stack.Screen name="EventForm" component={EventFormScreen} />
+          <Stack.Screen name="LocationForm" component={LocationFormScreen} />
+          <Stack.Screen name="Profile" component={ProfileScreen} />
+        </Stack.Navigator>
+      ) : (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Login" component={LoginScreen} />
+        </Stack.Navigator>
+      )}
     </NavigationContainer>
   );
 }

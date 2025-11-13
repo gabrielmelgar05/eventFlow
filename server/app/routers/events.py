@@ -1,10 +1,8 @@
 import os
 from typing import List
 from datetime import date, time
-
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
-
 from app.core.db import get_db
 from app.core.config import settings
 from app.models.event import Event
@@ -68,7 +66,6 @@ def upload_event_image(
         raise HTTPException(status_code=404, detail="Evento não encontrado")
     if obj.owner_id != user.id:
         raise HTTPException(status_code=403, detail="Sem permissão")
-
     ext = os.path.splitext(file.filename or "")[1].lower()
     fname = f"event_{event_id}{ext or '.jpg'}"
     path = os.path.join(settings.MEDIA_DIR, fname)
@@ -79,7 +76,6 @@ def upload_event_image(
     db.refresh(obj)
     return obj
 
-# endpoint form-data (útil p/ RN + upload em uma ida)
 @router.post("/create-with-image", response_model=EventOut, status_code=201)
 def create_with_image(
     name: str = Form(...),
@@ -94,15 +90,18 @@ def create_with_image(
     user: User = Depends(get_current_user),
 ):
     payload = EventCreate(
-        name=name, description=description,
-        event_date=event_date, event_time=event_time, price=price,
-        category_id=category_id, location_id=location_id
+        name=name,
+        description=description,
+        event_date=event_date,
+        event_time=event_time,
+        price=price,
+        category_id=category_id,
+        location_id=location_id,
     )
     obj = Event(**payload.model_dump(), owner_id=user.id)
     db.add(obj)
     db.commit()
     db.refresh(obj)
-
     if file:
         ext = os.path.splitext(file.filename or "")[1].lower()
         fname = f"event_{obj.id}{ext or '.jpg'}"
@@ -112,5 +111,4 @@ def create_with_image(
         obj.image_path = path
         db.commit()
         db.refresh(obj)
-
     return obj

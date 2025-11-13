@@ -1,3 +1,5 @@
+# models/location.py
+
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, Integer, Float
 from app.core.db import Base
@@ -12,3 +14,4 @@ class Location(Base):
     address: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     events: Mapped[list["Event"]] = relationship(back_populates="location")
+

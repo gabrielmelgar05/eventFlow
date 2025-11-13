@@ -1,44 +1,26 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
-import { useAuth } from "../../context/AuthContext";
+// src/screens/Profile/ProfileScreen.js
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import useAuth from '../../hooks/useAuth';
 
 export default function ProfileScreen() {
-  const auth = useAuth();
-
-  // Se o contexto ainda não estiver carregado
-  if (!auth) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#007bff" />
-      </View>
-    );
-  }
-
-  const { user, logout } = auth;
-
-  if (!user) {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.message}>Nenhum usuário logado</Text>
-        <TouchableOpacity onPress={logout} style={styles.button}>
-          <Text style={styles.buttonText}>Voltar para Login</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+  const { user, signOut } = useAuth();
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Minha Conta</Text>
-      <View style={styles.card}>
-        <Text style={styles.label}>Nome:</Text>
-        <Text style={styles.value}>{user.name}</Text>
-
-        <Text style={styles.label}>Email:</Text>
-        <Text style={styles.value}>{user.email}</Text>
+      <View style={styles.header}>
+        <View style={styles.avatar}>
+          <Text style={styles.avatarText}>
+            {user?.name?.[0]?.toUpperCase() || 'U'}
+          </Text>
+        </View>
+        <View>
+          <Text style={styles.name}>{user?.name}</Text>
+          <Text style={styles.email}>{user?.email}</Text>
+        </View>
       </View>
 
-      <TouchableOpacity onPress={logout} style={styles.logoutButton}>
+      <TouchableOpacity style={styles.logoutButton} onPress={signOut}>
         <Text style={styles.logoutText}>Sair</Text>
       </TouchableOpacity>
     </View>
@@ -46,64 +28,26 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f7f8fa",
-    padding: 20,
+  container: { flex: 1, backgroundColor: '#FFF', padding: 16 },
+  header: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  avatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#0011FF',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  center: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#000",
-    marginBottom: 20,
-  },
-  card: {
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    marginBottom: 20,
-  },
-  label: {
-    color: "#555",
-    fontSize: 14,
-    marginTop: 8,
-  },
-  value: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#222",
-  },
-  button: {
-    marginTop: 20,
-    backgroundColor: "#007bff",
-    padding: 12,
-    borderRadius: 8,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-  },
-  message: {
-    fontSize: 16,
-    color: "#555",
-  },
+  avatarText: { color: '#FFF', fontSize: 22, fontWeight: '700' },
+  name: { fontSize: 18, fontWeight: '600' },
+  email: { color: '#777' },
   logoutButton: {
-    backgroundColor: "#ff3b30",
-    padding: 14,
+    marginTop: 24,
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#FF3B30',
+    paddingVertical: 12,
+    alignItems: 'center',
   },
-  logoutText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-    textAlign: "center",
-  },
+  logoutText: { color: '#FF3B30', fontWeight: '600' },
 });
