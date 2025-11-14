@@ -1,3 +1,5 @@
+# schemas/auth.py
+
 from pydantic import BaseModel, EmailStr, Field
 
 class LoginInput(BaseModel):

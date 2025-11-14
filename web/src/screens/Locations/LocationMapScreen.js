@@ -1,143 +1,135 @@
-import React, { useEffect, useState } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native'
+import React, { useState } from 'react'
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import MapView, { Marker } from 'react-native-maps'
-import * as Location from 'expo-location'
-import { useNavigation } from '@react-navigation/native'
+import { Ionicons } from '@expo/vector-icons'
 
-export default function LocationMapScreen() {
-  const navigation = useNavigation()
-  const [region, setRegion] = useState(null)
-  const [marker, setMarker] = useState(null)
-  const [loading, setLoading] = useState(true)
+// Coordenada inicial para o mapa
+const initialRegion = {
+  latitude: -10.0, // Exemplo de coordenada (Porto Velho/Brasil)
+  longitude: -65.0,
+  latitudeDelta: 10,
+  longitudeDelta: 10,
+}
 
-  useEffect(() => {
-    getCurrentLocation()
-  }, [])
+export default function LocationMapScreen({ navigation }) {
+  const [selectedLocation, setSelectedLocation] = useState(null)
 
-  async function getCurrentLocation() {
-    try {
-      const { status } = await Location.requestForegroundPermissionsAsync()
-      if (status !== 'granted') {
-        setRegion({
-          latitude: -8.76077,
-          longitude: -63.8999,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        })
-        setLoading(false)
-        return
-      }
-      const loc = await Location.getCurrentPositionAsync({})
-      const reg = {
-        latitude: loc.coords.latitude,
-        longitude: loc.coords.longitude,
-        latitudeDelta: 0.05,
-        longitudeDelta: 0.05,
-      }
-      setRegion(reg)
-      setMarker({ latitude: reg.latitude, longitude: reg.longitude })
-    } catch (error) {
-      console.log(error)
-    } finally {
-      setLoading(false)
+  const handleMapPress = (e) => {
+    // Quando o usuário toca no mapa, salva a coordenada
+    setSelectedLocation(e.nativeEvent.coordinate)
+  }
+
+  const handleSaveLocation = () => {
+    if (selectedLocation) {
+      // Aqui você enviaria 'selectedLocation' de volta para o EventFormScreen
+      // Exemplo: navigation.navigate('EventForm', { location: selectedLocation });
+      console.log('Localização salva:', selectedLocation)
+      navigation.goBack() 
+    } else {
+      console.log('Selecione uma localização no mapa.')
     }
-  }
-
-  function handlePressMap(event) {
-    const { latitude, longitude } = event.nativeEvent.coordinate
-    setMarker({ latitude, longitude })
-  }
-
-  function handleConfirm() {
-    if (!marker) {
-      alert('Marque um ponto no mapa.')
-      return
-    }
-    navigation.navigate('LocationFormScreen', {
-      locationFromMap: {
-        latitude: marker.latitude,
-        longitude: marker.longitude,
-      },
-    })
-  }
-
-  if (loading || !region) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#0066FF" />
-      </View>
-    )
   }
 
   return (
     <View style={styles.container}>
-      <MapView style={styles.map} region={region} onPress={handlePressMap}>
-        {marker && <Marker coordinate={marker} />}
+      {/* Top Bar com botão Voltar */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Marcar Local no Mapa</Text>
+        <View style={{ width: 30 }} />
+      </View>
+
+      {/* Instrução */}
+      <View style={styles.instructionBox}>
+        <Text style={styles.instructionText}>Toque no mapa para marcar a localização do evento.</Text>
+      </View>
+
+      {/* Componente de Mapa */}
+      <MapView
+        style={styles.map}
+        initialRegion={initialRegion}
+        onPress={handleMapPress}
+      >
+        {/* Marcador da localização selecionada */}
+        {selectedLocation && (
+          <Marker
+            coordinate={selectedLocation}
+            title="Local do Evento"
+            draggable
+            onDragEnd={(e) => setSelectedLocation(e.nativeEvent.coordinate)}
+          />
+        )}
       </MapView>
-      <View style={styles.bottomPanel}>
-        <Text style={styles.infoText}>Toque no mapa para marcar o local.</Text>
-        <View style={styles.buttonsRow}>
-          <TouchableOpacity
-            style={[styles.button, styles.cancelButton]}
-            onPress={() => navigation.goBack()}
-          >
-            <Text style={styles.buttonTextCancel}>Cancelar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.button, styles.confirmButton]}
-            onPress={handleConfirm}
-          >
-            <Text style={styles.buttonTextConfirm}>Confirmar</Text>
-          </TouchableOpacity>
-        </View>
+
+      {/* Botão de Ação */}
+      <View style={styles.footer}>
+        <TouchableOpacity 
+          style={[styles.saveButton, !selectedLocation && styles.disabledButton]} 
+          onPress={handleSaveLocation}
+          disabled={!selectedLocation}
+        >
+          <Text style={styles.saveButtonText}>Salvar Localização</Text>
+        </TouchableOpacity>
       </View>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  center: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#F4F4F4',
-  },
   container: {
     flex: 1,
+    backgroundColor: '#fff',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 15,
+    paddingTop: 40,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  backButton: {
+    padding: 5,
+  },
+  instructionBox: {
+    padding: 10,
+    backgroundColor: '#fff3cd',
+    borderBottomWidth: 1,
+    borderColor: '#ffeeba',
+    alignItems: 'center',
+  },
+  instructionText: {
+    color: '#856404',
+    fontSize: 14,
   },
   map: {
     flex: 1,
   },
-  bottomPanel: {
-    padding: 16,
-    backgroundColor: '#FFFFFF',
+  footer: {
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    backgroundColor: '#fff',
   },
-  infoText: {
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  buttonsRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  button: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 32,
+  saveButton: {
+    backgroundColor: '#0011FF',
+    padding: 15,
+    borderRadius: 8,
     alignItems: 'center',
   },
-  cancelButton: {
-    backgroundColor: '#E5E5E5',
+  disabledButton: {
+    backgroundColor: '#ccc',
   },
-  confirmButton: {
-    backgroundColor: '#0066FF',
-  },
-  buttonTextCancel: {
-    color: '#333333',
-    fontWeight: '600',
-  },
-  buttonTextConfirm: {
-    color: '#FFFFFF',
-    fontWeight: '600',
+  saveButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 })

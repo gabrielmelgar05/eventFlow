@@ -1,4 +1,4 @@
-# routers/location.py
+# routers/locations.py
 
 
 from fastapi import APIRouter, Depends, HTTPException

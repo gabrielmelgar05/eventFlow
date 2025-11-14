@@ -1,50 +1,45 @@
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { useAuth } from '../context/AuthContext';
-import LoginScreen from '../screens/Auth/LoginScreen';
-import EventListScreen from '../screens/Catalogs/EventListScreen';
-import EventDetailScreen from '../screens/Catalogs/EventDetailScreen';
-import EventFormScreen from '../screens/Catalogs/EventFormScreen';
-import LocationsScreen from '../screens/Catalogs/LocationsScreen';
-import LocationFormScreen from '../screens/Catalogs/LocationFormScreen';
-import ProfileScreen from '../screens/Profile/ProfileScreen';
+import React from 'react'
+import { NavigationContainer } from '@react-navigation/native'
+import { createStackNavigator } from '@react-navigation/stack'
 
-const Stack = createStackNavigator();
-const Tab = createBottomTabNavigator();
+import { useAuth } from '../context/AuthContext'
 
-function AppTabs() {
-  return (
-    <Tab.Navigator screenOptions={{ headerShown: false }}>
-      <Tab.Screen name="Eventos" component={EventListScreen} />
-      <Tab.Screen name="Locais" component={LocationsScreen} />
-    </Tab.Navigator>
-  );
-}
+import LoginScreen from '../screens/Auth/LoginScreen'
+
+import TabNavigator from './TabNavigator'
+
+import EventDetailScreen from '../screens/Events/EventDetailScreen'
+import EventFormScreen from '../screens/Events/EventFormScreen'
+import LocationFormScreen from '../screens/Locations/LocationFormScreen'
+import LocationMapScreen from '../screens/Locations/LocationMapScreen'
+import ProfileScreen from '../screens/Profile/ProfileScreen'
+
+const Stack = createStackNavigator()
 
 export default function RootNavigator() {
-  const { signed, loading } = useAuth();
+  const { signed, loading } = useAuth()
 
   if (loading) {
-    return null;
+    // aqui depois você pode colocar uma SplashScreen bonitinha
+    return null
   }
 
   return (
     <NavigationContainer>
-      {signed ? (
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Main" component={AppTabs} />
-          <Stack.Screen name="EventDetail" component={EventDetailScreen} />
-          <Stack.Screen name="EventForm" component={EventFormScreen} />
-          <Stack.Screen name="LocationForm" component={LocationFormScreen} />
-          <Stack.Screen name="Profile" component={ProfileScreen} />
-        </Stack.Navigator>
-      ) : (
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {signed ? (
+          <>
+            <Stack.Screen name="MainTabs" component={TabNavigator} />
+            <Stack.Screen name="EventDetail" component={EventDetailScreen} />
+            <Stack.Screen name="EventForm" component={EventFormScreen} />
+            <Stack.Screen name="LocationForm" component={LocationFormScreen} />
+            <Stack.Screen name="LocationMap" component={LocationMapScreen} />
+            <Stack.Screen name="Profile" component={ProfileScreen} />
+          </>
+        ) : (
           <Stack.Screen name="Login" component={LoginScreen} />
-        </Stack.Navigator>
-      )}
+        )}
+      </Stack.Navigator>
     </NavigationContainer>
-  );
+  )
 }

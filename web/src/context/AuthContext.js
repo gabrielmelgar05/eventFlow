@@ -1,86 +1,87 @@
 // src/context/AuthContext.js
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as AuthApi from '../api/auth';
+import React, { createContext, useContext, useEffect, useState } from 'react'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import api from '../utils/api'
+import { login as loginApi } from '../api/auth'
 
-const AuthContext = createContext(null);
+const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null)
+  const [signed, setSigned] = useState(false)
+  const [loading, setLoading] = useState(true)
 
+  // carrega token do storage ao abrir o app
   useEffect(() => {
     async function loadStorage() {
       try {
-        const storedToken = await AsyncStorage.getItem('@eventflow:token');
-        const storedUser = await AsyncStorage.getItem('@eventflow:user');
+        const token = await AsyncStorage.getItem('@eventflow:token')
+        const storedUser = await AsyncStorage.getItem('@eventflow:user')
 
-        if (storedToken) setToken(storedToken);
-        if (storedUser) setUser(JSON.parse(storedUser));
+        if (token && storedUser) {
+          api.defaults.headers.Authorization = `Bearer ${token}`
+          setUser(JSON.parse(storedUser))
+          setSigned(true)
+        }
+      } catch (err) {
+        console.log('Erro carregando auth do storage', err)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
     }
 
-    loadStorage();
-  }, []);
+    loadStorage()
+  }, [])
 
   async function signIn({ email, password }) {
-    try {
-      console.log('AuthContext: chamando AuthApi.login...');
-      const data = await AuthApi.login(email, password);
-      console.log('AuthContext: resposta da API:', data);
+    console.log('AuthContext.signIn - start')
 
-      const accessToken = data.access_token || data.token;
-      const userData = data.user || { email };
+    // chama a API
+    const data = await loginApi({ email, password })
 
-      if (!accessToken) {
-        throw new Error('Token não retornado pela API');
-      }
-
-      setToken(accessToken);
-      setUser(userData);
-
-      await AsyncStorage.setItem('@eventflow:token', accessToken);
-      await AsyncStorage.setItem('@eventflow:user', JSON.stringify(userData));
-
-      return true; // ✅ indica que deu bom
-    } catch (error) {
-      console.log(
-        'AuthContext: erro no signIn:',
-        error?.response?.data || error.message
-      );
-      throw error; // deixa a tela tratar
+    // garante que existe token
+    if (!data?.token) {
+      throw new Error('Resposta de login sem token')
     }
+
+    const token = data.token
+    console.log('AuthContext.signIn - token recebido')
+
+    // seta token global no axios
+    api.defaults.headers.Authorization = `Bearer ${token}`
+
+    // salva em disco
+    await AsyncStorage.setItem('@eventflow:token', token)
+    await AsyncStorage.setItem(
+      '@eventflow:user',
+      JSON.stringify({ email }) // depois você pode trocar por /auth/me
+    )
+
+    // atualiza estado
+    setUser({ email })
+    setSigned(true)
+
+    console.log('AuthContext.signIn - finalizado com sucesso')
   }
 
   async function signOut() {
-    setToken(null);
-    setUser(null);
-    await AsyncStorage.multiRemove(['@eventflow:token', '@eventflow:user']);
+    await AsyncStorage.multiRemove(['@eventflow:token', '@eventflow:user'])
+    delete api.defaults.headers.Authorization
+    setUser(null)
+    setSigned(false)
   }
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        token,
-        signed: !!token,
-        loading,
-        signIn,
-        signOut,
-      }}
-    >
+    <AuthContext.Provider value={{ user, signed, loading, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
-  );
+  )
 }
 
 export function useAuth() {
-  const ctx = useContext(AuthContext);
+  const ctx = useContext(AuthContext)
   if (!ctx) {
-    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
+    throw new Error('useAuth deve ser usado dentro de AuthProvider')
   }
-  return ctx;
+  return ctx
 }

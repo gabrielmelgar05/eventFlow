@@ -1,4 +1,5 @@
 # app/seeds/seed.py
+
 from app.core.db import SessionLocal
 from app.models.user import User
 from app.core.security import get_password_hash

@@ -17,3 +17,6 @@ class LocationOut(BaseModel):
     latitude: float
     longitude: float
     address: str | None
+    
+    class Config:
+        from_attributes = True

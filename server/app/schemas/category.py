@@ -1,3 +1,5 @@
+# schemas/category.py
+
 from pydantic import BaseModel, Field
 
 class CategoryCreate(BaseModel):

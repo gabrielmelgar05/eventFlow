@@ -1,26 +1,17 @@
-import api from './client';
+// src/api/locations.js
 
-export async function fetchLocations(params = {}) {
-  const response = await api.get('/locations', { params });
+import api from '../utils/api';
+
+export async function getLocations() {
+  const response = await api.get('/locations');
   return response.data;
 }
 
-export async function fetchLocationById(id) {
-  const response = await api.get(`/locations/${id}`);
-  return response.data;
-}
-
+// Nota: A criação de Location será feita primariamente via /events/create-with-image
+// Se você precisar de um formulário de localização dedicado, crie:
+/*
 export async function createLocation(payload) {
   const response = await api.post('/locations', payload);
   return response.data;
 }
-
-export async function updateLocation(id, payload) {
-  const response = await api.put(`/locations/${id}`, payload);
-  return response.data;
-}
-
-export async function deleteLocation(id) {
-  const response = await api.delete(`/locations/${id}`);
-  return response.data;
-}
+*/

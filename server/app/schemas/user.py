@@ -1,3 +1,5 @@
+# schemas/user.py
+
 from pydantic import BaseModel, EmailStr
 
 class UserSchema(BaseModel):
